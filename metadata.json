@@ -1,0 +1,7 @@
+{
+  "name": "DishPlay - Digital Video Menu",
+  "description": "A high-performance, mobile-first video menu system for the hospitality industry, transforming YouTube playlists into a seamless, app-like native experience.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
