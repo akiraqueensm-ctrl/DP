@@ -34,7 +34,7 @@ export const MOCK_DISHES_MAP: Record<string, Dish[]> = {
       title: 'Atlantic Scallops',
       description: 'Pan-seared with cauliflower purée.',
       price: '$28',
-      videoId: 'YpS99v4XG3A',
+      videoId: 'W9dvAgLyqAU',
       thumbnail: 'https://images.unsplash.com/photo-1533777324545-e0162727fc90?w=600&h=800&fit=crop',
       category: 'Starters'
     }

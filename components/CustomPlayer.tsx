@@ -14,6 +14,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
   const [isMuted, setIsMuted] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -51,6 +52,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
               } else if (event.data === 0) { // ENDED
                 setHasEnded(true);
                 setIsPlaying(false);
+                setProgress(100);
               }
             },
             onError: (err: any) => {
@@ -81,6 +83,25 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
     };
   }, [videoId]);
 
+  // Sincronización Real del Progreso
+  useEffect(() => {
+    let progressInterval: number;
+
+    if (isPlaying && isReady && playerRef.current) {
+      progressInterval = window.setInterval(() => {
+        const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+        if (duration > 0) {
+          setProgress((currentTime / duration) * 100);
+        }
+      }, 100);
+    }
+
+    return () => {
+      if (progressInterval) clearInterval(progressInterval);
+    };
+  }, [isPlaying, isReady]);
+
   const togglePlay = () => {
     if (!playerRef.current || !isReady) return;
     if (isPlaying) {
@@ -88,6 +109,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
     } else {
       if (hasEnded) {
         playerRef.current.seekTo(0);
+        setProgress(0);
       }
       playerRef.current.playVideo();
     }
@@ -109,6 +131,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
     playerRef.current.seekTo(0);
     playerRef.current.playVideo();
     setHasEnded(false);
+    setProgress(0);
   };
 
   return (
@@ -181,21 +204,14 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Barra de Progreso Sincronizada */}
         <div className="absolute bottom-0 left-0 h-1 bg-white/10 w-full z-30">
-          {isReady && isPlaying && (
-            <div className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-progress-expand origin-left"></div>
-          )}
+          <div 
+            className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-100 ease-linear origin-left"
+            style={{ width: `${progress}%` }}
+          ></div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes progress-expand { 
-          from { transform: scaleX(0); } 
-          to { transform: scaleX(1); } 
-        }
-        .animate-progress-expand { animation: progress-expand 30s linear forwards; }
-      `}</style>
     </div>
   );
 };
