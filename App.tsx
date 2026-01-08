@@ -27,9 +27,6 @@ const App: React.FC = () => {
   const handleScanSuccess = useCallback((rId: string) => {
     const targetRestaurant = RESTAURANTS[rId];
     if (targetRestaurant) {
-      // We purely rely on React state for transitions. 
-      // Removing window.history.pushState as it causes SecurityErrors and Circular Structure errors 
-      // in proxied/blob environments.
       setRestaurant(targetRestaurant);
       setDishes(MOCK_DISHES_MAP[rId] || []);
       setIsScanning(false);
@@ -39,7 +36,7 @@ const App: React.FC = () => {
 
   if (!restaurant) {
     return (
-      <div className="bg-black min-h-screen">
+      <div className="bg-[#f8f5f0] min-h-screen">
         {isScanning ? (
           <Scanner onScan={handleScanSuccess} onClose={() => setIsScanning(false)} />
         ) : (
@@ -55,25 +52,28 @@ const App: React.FC = () => {
     : dishes.filter(d => d.category === activeCategory);
 
   return (
-    <div className="min-h-screen pb-24 animate-in fade-in duration-700 bg-black text-white">
-      <header className="px-6 pt-12 pb-8 flex flex-col items-center text-center">
-        <div className="w-24 h-24 bg-neutral-800 rounded-full mb-6 overflow-hidden border border-white/10 shadow-2xl ring-4 ring-white/5">
+    <div className="min-h-screen pb-24 animate-in fade-in duration-700 bg-[#f8f5f0] text-neutral-900">
+      {/* Header Estilo Panchita */}
+      <header className="px-6 pt-16 pb-8 flex flex-col items-center text-center">
+        <div className="w-20 h-20 bg-white rounded-full mb-6 overflow-hidden border border-neutral-200 shadow-sm">
           <img src={restaurant.logo} alt={restaurant.name} className="w-full h-full object-cover" />
         </div>
-        <h1 className="text-4xl font-display mb-2">{restaurant.name}</h1>
-        <p className="text-sm font-light text-neutral-400 uppercase tracking-widest">{restaurant.description}</p>
+        <h1 className="text-4xl font-display mb-2 text-neutral-900">{restaurant.name}</h1>
+        <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-[0.3em] max-w-xs">{restaurant.description}</p>
+        <div className="h-[1px] w-12 bg-neutral-300 mt-6"></div>
       </header>
 
-      <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 py-4 mb-8">
-        <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar">
+      {/* Categorías Minimalistas */}
+      <div className="sticky top-0 z-40 bg-[#f8f5f0]/90 backdrop-blur-xl border-b border-neutral-200/50 py-4 mb-10">
+        <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar justify-center md:justify-center">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap px-6 py-2 rounded-full text-xs uppercase tracking-widest font-medium transition-all ${
+              className={`whitespace-nowrap px-5 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all ${
                 activeCategory === cat 
-                ? 'bg-white text-black' 
-                : 'bg-neutral-900 text-neutral-400 hover:text-white border border-white/5'
+                ? 'bg-neutral-900 text-white shadow-md' 
+                : 'bg-white/50 text-neutral-500 hover:text-neutral-900 border border-neutral-200'
               }`}
             >
               {cat}
@@ -82,8 +82,9 @@ const App: React.FC = () => {
         </div>
       </div>
 
+      {/* Grid de Platos (3 columnas en desktop como en la imagen) */}
       <main className="px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {filteredDishes.map(dish => (
             <DishCard 
               key={dish.id} 
@@ -94,28 +95,30 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className="mt-24 px-6 py-12 border-t border-white/5 text-center">
+      {/* Footer elegante */}
+      <footer className="mt-24 px-6 py-12 border-t border-neutral-200 text-center bg-white/30">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <ChefHat size={20} className="text-neutral-500" />
-          <span className="text-xs uppercase tracking-[0.3em] font-medium text-neutral-500">DishPlay</span>
+          <ChefHat size={18} className="text-neutral-400" />
+          <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-neutral-400">DishPlay</span>
         </div>
-        <p className="text-[10px] uppercase tracking-widest text-neutral-600">Video First Dining Experience</p>
+        <p className="text-[9px] uppercase tracking-widest text-neutral-400">Menú Digital Cinematográfico</p>
       </footer>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-neutral-900/90 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-full shadow-2xl z-40">
+      {/* Floating Action Button */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-neutral-900 text-white px-6 py-3.5 rounded-full shadow-2xl z-40 border border-white/10 active:scale-95 transition-transform">
         <button 
           onClick={() => setIsScanning(true)}
-          className="flex items-center gap-2 px-3 border-r border-white/10 pr-4 text-white active:scale-95 transition-transform"
+          className="flex items-center gap-2.5 px-2 border-r border-white/20 pr-5"
         >
           <Scan size={16} />
-          <span className="text-xs uppercase tracking-widest font-medium">Nuevo Scan</span>
+          <span className="text-[10px] uppercase tracking-widest font-bold">Nuevo Scan</span>
         </button>
-        <button className="flex items-center gap-2 pl-1 text-white opacity-60">
+        <button className="flex items-center gap-2 pl-1 opacity-80">
           <Share2 size={16} />
-          <span className="text-xs uppercase tracking-widest font-medium">Compartir</span>
         </button>
       </div>
 
+      {/* Video Player (Se mantiene oscuro para contraste) */}
       {selectedDish && (
         <CustomPlayer 
           videoId={selectedDish.videoId} 

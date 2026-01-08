@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Dish } from '../types';
-import { Play } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface DishCardProps {
   dish: Dish;
@@ -12,37 +12,40 @@ const DishCard: React.FC<DishCardProps> = ({ dish, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className="group relative aspect-[3/4] overflow-hidden rounded-2xl bg-neutral-900 cursor-pointer shadow-lg"
+      className="group flex bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer border border-neutral-100 h-full min-h-[160px]"
     >
-      {/* Usamos object-cover y object-center para que las miniaturas horizontales de YouTube se vean bien */}
-      <img 
-        src={dish.thumbnail} 
-        alt={dish.title}
-        className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
-        loading="lazy"
-      />
-      
-      {/* Gradient Overlay - Más profundo para mejor legibilidad de textos blancos */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
-      
-      {/* Content */}
-      <div className="absolute inset-0 p-6 flex flex-col justify-end">
-        <div className="flex items-end justify-between">
-          <div className="pr-4">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-white/60 mb-1">{dish.category}</p>
-            <h3 className="text-xl font-display leading-tight text-white drop-shadow-md">{dish.title}</h3>
-            <p className="text-lg mt-1 font-light text-white/90 italic">{dish.price}</p>
-          </div>
-          
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-xl p-3.5 rounded-full border border-white/20 text-white transition-all group-hover:scale-110 group-hover:bg-white group-hover:text-black shadow-xl">
-            <Play size={20} fill="currentColor" />
-          </div>
+      {/* Left: Text Content */}
+      <div className="flex-1 p-5 flex flex-col justify-between">
+        <div>
+          <h3 className="text-[17px] font-bold font-display text-neutral-900 leading-snug mb-2 group-hover:text-amber-800 transition-colors">
+            {dish.title}
+          </h3>
+          <p className="text-[13px] text-neutral-600 line-clamp-2 leading-relaxed font-light">
+            {dish.description}
+          </p>
+          <p className="text-[11px] text-neutral-400 mt-1">...</p>
+        </div>
+        
+        <div className="mt-4">
+          <p className="text-[15px] font-medium text-neutral-900 font-display">
+            {dish.price}
+          </p>
         </div>
       </div>
 
-      {/* Hover State: "Ver Video" label */}
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-        <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-white">Ver Video</span>
+      {/* Right: Image */}
+      <div className="relative w-40 sm:w-48 overflow-hidden">
+        <img 
+          src={dish.thumbnail} 
+          alt={dish.title}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        
+        {/* Play/Plus Icon Overlay */}
+        <div className="absolute bottom-3 right-3 bg-neutral-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/20 text-white transition-all group-hover:bg-amber-900 group-hover:scale-110">
+          <Plus size={18} />
+        </div>
       </div>
     </div>
   );
