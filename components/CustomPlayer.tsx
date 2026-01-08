@@ -148,21 +148,21 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-0 animate-in fade-in duration-300">
       <div className="relative w-full h-full md:max-w-5xl md:aspect-video bg-black overflow-hidden shadow-2xl md:rounded-2xl border border-white/5">
         
-        {/* YouTube Iframe - Aumento de escala y ajuste para ocultar UI (Watch Later / Titulo) */}
+        {/* YouTube Iframe - Recorte optimizado para ocultar UI de YT */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none scale-[1.3] translate-y-[-5%] md:translate-y-0">
           <div id={`youtube-player-${videoId}`} className="w-full h-full"></div>
         </div>
 
-        {/* Capa de Interacción Central (Play/Pause) */}
+        {/* Capa de Interacción Central */}
         <div className="absolute inset-0 z-10 cursor-pointer" onClick={togglePlay}></div>
 
         {/* UI Overlay */}
         <div className="absolute inset-0 z-20 flex flex-col justify-between pointer-events-none">
-          {/* Header */}
-          <div className="p-6 md:p-8 flex justify-between items-start pointer-events-auto">
+          {/* Header - Ajustado para no chocar con el borde superior */}
+          <div className="p-8 md:p-10 flex justify-between items-start pointer-events-auto">
             <button 
               onClick={(e) => { e.stopPropagation(); onClose(); }} 
               className="bg-black/50 backdrop-blur-xl p-3 rounded-full border border-white/10 active:scale-90 transition-transform"
@@ -196,21 +196,21 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
             </div>
           )}
 
-          {/* Control Bar (Play & Volume) */}
-          <div className="p-6 md:p-10 pb-10 md:pb-12 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+          {/* Control Bar - Elevada del fondo en móvil para consistencia con Desktop */}
+          <div className="p-8 md:p-10 pb-12 md:pb-14 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-black/90 via-black/40 to-transparent">
             <div className="flex gap-4 md:gap-6">
               <button 
                 onClick={(e) => { e.stopPropagation(); togglePlay(); }} 
-                className={`p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${isPlaying ? 'bg-white/10 text-white' : 'bg-white text-black'}`}
+                className={`p-4 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${isPlaying ? 'bg-white/10 text-white' : 'bg-white text-black'}`}
               >
-                {isPlaying ? <Pause size={22} className="md:w-6 md:h-6" /> : <Play size={22} fill="currentColor" className="md:w-6 md:h-6" />}
+                {isPlaying ? <Pause size={24} className="md:w-6 md:h-6" /> : <Play size={24} fill="currentColor" className="md:w-6 md:h-6" />}
               </button>
               
               <button 
                 onClick={(e) => { e.stopPropagation(); toggleMute(); }} 
-                className={`p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${!isMuted ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-white/10 text-white'}`}
+                className={`p-4 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${!isMuted ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-white/10 text-white'}`}
               >
-                {isMuted ? <VolumeX size={22} className="md:w-6 md:h-6" /> : <Volume2 size={22} className="md:w-6 md:h-6" />}
+                {isMuted ? <VolumeX size={24} className="md:w-6 md:h-6" /> : <Volume2 size={24} className="md:w-6 md:h-6" />}
               </button>
             </div>
             
@@ -223,23 +223,24 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
           </div>
         </div>
 
-        {/* Barra de Progreso Interactiva (Seeker) */}
+        {/* Barra de Progreso Interactiva - Posicionada ligeramente por encima del borde inferior absoluto */}
         <div 
           ref={progressBarRef}
           onClick={(e) => { e.stopPropagation(); handleSeek(e); }}
           onTouchStart={(e) => { e.stopPropagation(); handleSeek(e); }}
-          className="absolute bottom-0 left-0 h-4 w-full z-30 cursor-pointer group pointer-events-auto"
+          className="absolute bottom-6 md:bottom-8 left-6 md:left-10 right-6 md:right-10 h-6 z-30 cursor-pointer group pointer-events-auto flex items-center"
         >
           {/* Fondo de la barra */}
-          <div className="absolute bottom-0 left-0 h-1.5 w-full bg-white/20 group-hover:h-2 transition-all"></div>
-          {/* Progreso actual */}
+          <div className="relative h-1 w-full bg-white/20 group-hover:h-2 transition-all rounded-full overflow-hidden">
+            {/* Progreso actual */}
+            <div 
+              className="absolute top-0 left-0 h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-100 ease-linear origin-left"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          {/* Punto de arrastre (Handle) visual */}
           <div 
-            className="absolute bottom-0 left-0 h-1.5 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-100 ease-linear origin-left group-hover:h-2"
-            style={{ width: `${progress}%` }}
-          ></div>
-          {/* Punto de arrastre (Handle) visual en hover */}
-          <div 
-            className="absolute bottom-[2px] w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1/2 shadow-xl"
+            className="absolute h-3 w-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1/2 shadow-xl border border-black/20"
             style={{ left: `${progress}%` }}
           ></div>
         </div>
