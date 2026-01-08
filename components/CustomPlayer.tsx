@@ -10,6 +10,7 @@ interface CustomPlayerProps {
 
 const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) => {
   const playerRef = useRef<any>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isReady, setIsReady] = useState(false);
@@ -34,8 +35,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
             mute: 1,
             playsinline: 1,
             enablejsapi: 1,
-            origin: window.location.origin,
-            widget_referrer: window.location.origin
+            origin: window.location.origin
           },
           events: {
             onReady: (event: any) => {
@@ -54,9 +54,6 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
                 setIsPlaying(false);
                 setProgress(100);
               }
-            },
-            onError: (err: any) => {
-              console.error('YouTube Player Error:', err);
             }
           }
         });
@@ -86,7 +83,6 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
   // Sincronización Real del Progreso
   useEffect(() => {
     let progressInterval: number;
-
     if (isPlaying && isReady && playerRef.current) {
       progressInterval = window.setInterval(() => {
         const currentTime = playerRef.current.getCurrentTime();
@@ -96,11 +92,28 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
         }
       }, 100);
     }
-
-    return () => {
-      if (progressInterval) clearInterval(progressInterval);
-    };
+    return () => { if (progressInterval) clearInterval(progressInterval); };
   }, [isPlaying, isReady]);
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!playerRef.current || !isReady || !progressBarRef.current) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    let clientX = 0;
+    
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+    }
+
+    const pos = (clientX - rect.left) / rect.width;
+    const seekTime = Math.max(0, Math.min(1, pos)) * playerRef.current.getDuration();
+    
+    playerRef.current.seekTo(seekTime, true);
+    setProgress(pos * 100);
+    if (!isPlaying) playerRef.current.playVideo();
+  };
 
   const togglePlay = () => {
     if (!playerRef.current || !isReady) return;
@@ -135,38 +148,37 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
-      {/* Container principal con relación 16:9 */}
-      <div className="relative w-full max-w-5xl aspect-video bg-black overflow-hidden shadow-2xl md:rounded-2xl border border-white/5">
+    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center p-0 md:p-6 animate-in fade-in duration-300">
+      <div className="relative w-full h-full md:max-w-5xl md:aspect-video bg-black overflow-hidden shadow-2xl md:rounded-2xl border border-white/5">
         
-        {/* YouTube Iframe con Over-Scaling para ocultar UI de YouTube */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div id={`youtube-player-${videoId}`} className="w-full h-full scale-[1.15] pointer-events-none"></div>
+        {/* YouTube Iframe - Aumento de escala y ajuste para ocultar UI (Watch Later / Titulo) */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none scale-[1.3] translate-y-[-5%] md:translate-y-0">
+          <div id={`youtube-player-${videoId}`} className="w-full h-full"></div>
         </div>
 
-        {/* Capa Anti-Leak (Bloquea clicks directos al iframe) */}
+        {/* Capa de Interacción Central (Play/Pause) */}
         <div className="absolute inset-0 z-10 cursor-pointer" onClick={togglePlay}></div>
 
         {/* UI Overlay */}
         <div className="absolute inset-0 z-20 flex flex-col justify-between pointer-events-none">
           {/* Header */}
-          <div className="p-4 md:p-8 flex justify-between items-start pointer-events-auto">
+          <div className="p-6 md:p-8 flex justify-between items-start pointer-events-auto">
             <button 
               onClick={(e) => { e.stopPropagation(); onClose(); }} 
-              className="bg-black/40 backdrop-blur-xl p-3 rounded-full border border-white/10 active:scale-90 transition-transform"
+              className="bg-black/50 backdrop-blur-xl p-3 rounded-full border border-white/10 active:scale-90 transition-transform"
             >
               <X size={24} className="text-white" />
             </button>
             <div className="text-right">
-              <h2 className="text-white font-display text-xl md:text-3xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">{title}</h2>
-              <div className="h-0.5 w-10 bg-white ml-auto mt-2 rounded-full opacity-80"></div>
+              <h2 className="text-white font-display text-xl md:text-3xl drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">{title}</h2>
+              <div className="h-0.5 w-10 bg-white ml-auto mt-2 rounded-full opacity-80 shadow-lg"></div>
             </div>
           </div>
 
-          {/* Central Play Icon (Solo cuando está pausado) */}
+          {/* Central Play Icon */}
           {!isPlaying && !hasEnded && isReady && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-2xl p-6 md:p-10 rounded-full border border-white/20 animate-in zoom-in duration-300">
+              <div className="bg-white/10 backdrop-blur-2xl p-8 md:p-12 rounded-full border border-white/20 animate-in zoom-in duration-300 shadow-2xl">
                 <Play fill="white" size={32} className="text-white md:w-12 md:h-12" />
               </div>
             </div>
@@ -176,7 +188,7 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
           {hasEnded && (
             <div className="absolute inset-0 bg-black/70 flex items-center justify-center pointer-events-auto backdrop-blur-sm">
               <button onClick={replay} className="flex flex-col items-center gap-4 transition-transform active:scale-95 group">
-                <div className="bg-white p-5 md:p-8 rounded-full group-hover:bg-neutral-200 transition-colors">
+                <div className="bg-white p-6 md:p-10 rounded-full group-hover:bg-neutral-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.3)]">
                   <RotateCcw size={28} className="text-black md:w-10 md:h-10" />
                 </div>
                 <span className="text-white font-medium uppercase tracking-[0.3em] text-[10px] md:text-xs">Repetir Plato</span>
@@ -184,31 +196,51 @@ const CustomPlayer: React.FC<CustomPlayerProps> = ({ videoId, onClose, title }) 
             </div>
           )}
 
-          {/* Controls Bar */}
-          <div className="p-4 md:p-8 pb-8 md:pb-10 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-black/80 to-transparent">
-            <div className="flex gap-3 md:gap-5">
-              <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="bg-white/10 backdrop-blur-xl p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 hover:bg-white/20">
-                {isPlaying ? <Pause size={20} className="md:w-6 md:h-6" /> : <Play size={20} fill="white" className="md:w-6 md:h-6" />}
+          {/* Control Bar (Play & Volume) */}
+          <div className="p-6 md:p-10 pb-10 md:pb-12 flex items-center justify-between pointer-events-auto bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+            <div className="flex gap-4 md:gap-6">
+              <button 
+                onClick={(e) => { e.stopPropagation(); togglePlay(); }} 
+                className={`p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${isPlaying ? 'bg-white/10 text-white' : 'bg-white text-black'}`}
+              >
+                {isPlaying ? <Pause size={22} className="md:w-6 md:h-6" /> : <Play size={22} fill="currentColor" className="md:w-6 md:h-6" />}
               </button>
-              <button onClick={(e) => { e.stopPropagation(); toggleMute(); }} className="bg-white/10 backdrop-blur-xl p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 hover:bg-white/20">
-                {isMuted ? <VolumeX size={20} className="md:w-6 md:h-6" /> : <Volume2 size={20} className="md:w-6 md:h-6" />}
+              
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleMute(); }} 
+                className={`p-3 md:p-5 rounded-full border border-white/10 transition-all active:scale-90 ${!isMuted ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-white/10 text-white'}`}
+              >
+                {isMuted ? <VolumeX size={22} className="md:w-6 md:h-6" /> : <Volume2 size={22} className="md:w-6 md:h-6" />}
               </button>
             </div>
             
             {!isReady && (
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
-                <span className="text-[10px] font-medium uppercase tracking-[0.2em] opacity-80">Preparando...</span>
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]"></div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white opacity-80">Cargando...</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Barra de Progreso Sincronizada */}
-        <div className="absolute bottom-0 left-0 h-1 bg-white/10 w-full z-30">
+        {/* Barra de Progreso Interactiva (Seeker) */}
+        <div 
+          ref={progressBarRef}
+          onClick={(e) => { e.stopPropagation(); handleSeek(e); }}
+          onTouchStart={(e) => { e.stopPropagation(); handleSeek(e); }}
+          className="absolute bottom-0 left-0 h-4 w-full z-30 cursor-pointer group pointer-events-auto"
+        >
+          {/* Fondo de la barra */}
+          <div className="absolute bottom-0 left-0 h-1.5 w-full bg-white/20 group-hover:h-2 transition-all"></div>
+          {/* Progreso actual */}
           <div 
-            className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-100 ease-linear origin-left"
+            className="absolute bottom-0 left-0 h-1.5 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all duration-100 ease-linear origin-left group-hover:h-2"
             style={{ width: `${progress}%` }}
+          ></div>
+          {/* Punto de arrastre (Handle) visual en hover */}
+          <div 
+            className="absolute bottom-[2px] w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1/2 shadow-xl"
+            style={{ left: `${progress}%` }}
           ></div>
         </div>
       </div>
