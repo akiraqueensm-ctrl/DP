@@ -26,7 +26,7 @@ export const MOCK_DISHES_MAP: Record<string, Dish[]> = {
       description: 'Dry-aged 30 days, served with truffle butter.',
       price: '$42',
       videoId: 'i_vfh_kB7i4',
-      thumbnail: 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=600&h=800&fit=crop',
+      thumbnail: 'https://img.youtube.com/vi/i_vfh_kB7i4/hqdefault.jpg',
       category: 'Mains'
     },
     {
@@ -35,7 +35,7 @@ export const MOCK_DISHES_MAP: Record<string, Dish[]> = {
       description: 'Pan-seared with cauliflower purée.',
       price: '$28',
       videoId: 'W9dvAgLyqAU',
-      thumbnail: 'https://images.unsplash.com/photo-1533777324545-e0162727fc90?w=600&h=800&fit=crop',
+      thumbnail: 'https://img.youtube.com/vi/W9dvAgLyqAU/hqdefault.jpg',
       category: 'Starters'
     }
   ],
@@ -46,7 +46,7 @@ export const MOCK_DISHES_MAP: Record<string, Dish[]> = {
       description: 'Arborio rice with porcini and shiitake.',
       price: '$24',
       videoId: '7_zT6_yEw4s',
-      thumbnail: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=800&fit=crop',
+      thumbnail: 'https://img.youtube.com/vi/7_zT6_yEw4s/hqdefault.jpg',
       category: 'Mains'
     },
     {
@@ -55,7 +55,7 @@ export const MOCK_DISHES_MAP: Record<string, Dish[]> = {
       description: 'Molten center, vanilla bean gelato.',
       price: '$16',
       videoId: 'vI_U_tGsmS0',
-      thumbnail: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&h=800&fit=crop',
+      thumbnail: 'https://img.youtube.com/vi/vI_U_tGsmS0/hqdefault.jpg',
       category: 'Desserts'
     }
   ]
