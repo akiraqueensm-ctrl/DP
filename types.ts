@@ -9,6 +9,10 @@ export interface Dish {
   category: string;
 }
 
+export interface OrderItem extends Dish {
+  quantity: number;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
